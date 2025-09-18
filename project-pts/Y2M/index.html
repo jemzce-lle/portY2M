@@ -1,0 +1,411 @@
+<!doctype html>
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Y2M</title>
+  <style>
+    :root{
+      --font: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      --radius: 18px;
+      /* Light */
+      --bg:#f7f3e9; --surface:#fff; --text:#122033; --muted:#6b7b8c; --accent:#c8a857; --line:#e6e0d2;
+      --shadow:0 10px 28px rgba(3,16,32,.10);
+    }
+    [data-theme="dark"]{
+      --bg:#0b1220; --surface:#0f172a; --text:#e6e9ef; --muted:#9aa4b2; --accent:#d3b86e; --line:#1d2740;
+      --shadow:0 14px 34px rgba(0,0,0,.45);
+    }
+    @media (prefers-reduced-motion: reduce){
+      *{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;}
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;overflow-x:hidden;scroll-behavior:smooth}
+    img{max-width:100%;display:block}
+    a{text-decoration:none;color:inherit}
+
+    /* Background flair */
+    .grid{position:fixed;inset:0;z-index:-3;pointer-events:none;background-image:
+      linear-gradient(rgba(0,0,0,.06) 1px,transparent 1px),
+      linear-gradient(90deg, rgba(0,0,0,.06) 1px,transparent 1px);background-size:28px 28px;opacity:.06;mix-blend-mode:multiply}
+    [data-theme="dark"] .grid{opacity:.08}
+    .blobs{position:fixed;inset:-20% -10% -10% -10%;z-index:-4;filter:blur(60px);opacity:.55}
+    .blob{position:absolute;width:42vmax;height:42vmax;border-radius:50%;mix-blend-mode:multiply}
+    .b1{left:-5%;top:0;background:radial-gradient(circle at 35% 30%, #ffd56b 0%, transparent 60%);animation:float 24s ease-in-out infinite}
+    .b2{right:-10%;top:10%;background:radial-gradient(circle at 70% 40%, #9fb7d3 0%, transparent 60%);animation:float 30s ease-in-out infinite reverse}
+    @keyframes float{0%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(2%,-2%,0) scale(1.03)}100%{transform:translate3d(0,0,0) scale(1)}}
+
+    /* Nav */
+    .skip{position:absolute;left:-9999px}
+    .skip:focus{left:16px;top:12px;background:var(--surface);color:var(--text);padding:8px 12px;border-radius:10px;box-shadow:var(--shadow)}
+    .nav{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.55);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+    [data-theme="dark"] .nav{background:rgba(15,23,42,.55)}
+    .nav-in{max-width:1120px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;padding:12px 20px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;position:relative}
+    /* LOGO: timbul + glow ambient terus-menerus */
+    .logo{
+      width:28px;height:28px;border-radius:8px;position:relative;isolation:isolate;
+      background:linear-gradient(135deg, var(--accent), #937f3b);
+      box-shadow:
+        inset 0 2px 2px rgba(255,255,255,.6),
+        inset 0 -3px 6px rgba(0,0,0,.25),
+        0 6px 18px rgba(0,0,0,.20);
+    }
+    .logo::after{
+      content:""; position:absolute; inset:-12px; z-index:-1; border-radius:12px;
+      background: radial-gradient(closest-side, color-mix(in lab, var(--accent) 55%, transparent), transparent 70%);
+      filter: blur(18px); opacity:.85; animation: aura 3.2s ease-in-out infinite alternate;
+    }
+    @keyframes aura { from{transform:scale(1)} to{transform:scale(1.12)} }
+
+    .links{display:flex;gap:16px;align-items:center}
+    .links a{padding:8px 10px;border-radius:10px}
+    .links a.active,.links a:hover{background:var(--surface);box-shadow:var(--shadow)}
+    .actions{display:flex;gap:10px}
+    .btn{border:1px solid var(--line);background:var(--surface);padding:10px 14px;border-radius:14px;box-shadow:var(--shadow);cursor:pointer;transition:transform .2s,box-shadow .2s}
+    .btn:hover{transform:translateY(-2px)}
+    .btn.primary{background:linear-gradient(135deg, var(--accent), #b59c54);color:#0b0b0b;border-color:transparent}
+    .eq{display:inline-flex;gap:2px;margin-right:8px}
+    .eq i{display:block;width:3px;height:8px;background:currentColor;opacity:.7;border-radius:2px;transform-origin:bottom}
+    body.is-playing #soundBtn .eq i:nth-child(1){animation:bar .6s ease-in-out infinite}
+    body.is-playing #soundBtn .eq i:nth-child(2){animation:bar .5s ease-in-out infinite .1s}
+    body.is-playing #soundBtn .eq i:nth-child(3){animation:bar .7s ease-in-out infinite .2s}
+    @keyframes bar{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+
+    /* Sections & cards */
+    section{max-width:1120px;margin:0 auto;padding:64px 20px;scroll-margin-top:84px}
+    .hero{display:grid;grid-template-columns:1.2fr 1fr;gap:28px;align-items:center}
+    .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+    h1{font-size:clamp(32px,6vw,56px);line-height:1.1;margin:0 0 10px}
+    .muted{color:var(--muted)}
+    .projects{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);transition:transform .25s, box-shadow .25s}
+    .card:hover{transform:translateY(-4px)}
+    .card h3{margin:8px 0 6px;font-size:18px}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;color:var(--muted)}
+    .contact form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .contact form .full{grid-column:1 / -1}
+    input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text)}
+    textarea{min-height:120px;resize:vertical}
+    footer{border-top:1px solid var(--line);text-align:center;padding:28px 20px;color:var(--muted)}
+    .glow-ambient{position:relative}
+    .glow-ambient::after{content:"";position:absolute;inset:-2px;border-radius:inherit;box-shadow:0 0 0 0 color-mix(in lab, var(--accent) 40%, transparent),0 0 48px color-mix(in lab, var(--accent) 22%, transparent);opacity:0;transition:opacity .35s, box-shadow .35s;pointer-events:none}
+    .glow-ambient:hover::after{opacity:1;box-shadow:0 0 0 1px color-mix(in lab, var(--accent) 55%, transparent),0 0 64px color-mix(in lab, var(--accent) 28%, transparent)}
+    .timbul{text-shadow:0 1px 0 color-mix(in lab, var(--surface) 75%, transparent), 0 14px 24px rgba(0,0,0,.18)}
+
+    /* Marquee */
+    .marquee{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:linear-gradient(to right, color-mix(in lab, var(--surface) 98%, transparent), transparent 70%)}
+    .marquee .flow{display:flex;width:200%;animation:flow 28s linear infinite}
+    .marquee .content{display:flex;gap:32px;align-items:center;white-space:nowrap;padding:8px 10px;width:50%}
+    @keyframes flow{from{transform:translateX(0)} to{transform:translateX(-50%)}}
+
+    /* Reveal on scroll */
+    [data-ani]{opacity:.001; transform:var(--init, translateY(12px)); transition:transform .8s cubic-bezier(.2,.8,.2,1), opacity .6s ease; will-change:transform,opacity}
+    [data-ani].in{opacity:1; transform:none}
+    [data-ani="fade-up"]{--init: translateY(14px)}
+    [data-ani="fade-down"]{--init: translateY(-14px)}
+    [data-ani="fade-left"]{--init: translateX(-18px)}
+    [data-ani="fade-right"]{--init: translateX(18px)}
+    [data-ani="pop"]{--init: scale(.96)}
+
+    /* Typewriter */
+    .type{display:inline-block; position:relative}
+    .caret{display:inline-block; width:1px; background:currentColor; margin-left:6px; animation:blink 1s steps(1) infinite}
+    @keyframes blink{50%{opacity:0}}
+
+    /* Section flash saat selesai scroll */
+    @keyframes sectionFlash{0%{box-shadow:0 0 0 0 rgba(200,168,87,.0)}40%{box-shadow:0 0 0 6px rgba(200,168,87,.18)}100%{box-shadow:0 0 0 0 rgba(200,168,87,.0)}}
+    .section-flash{animation:sectionFlash .9s ease-out}
+
+    /* ===== About: 3D Photo Flip (WITH BACK, plain & theme-aware) ===== */
+    .about-3d{max-width:1120px;margin:0 auto;padding:64px 20px}
+    .about-3d h2{margin:0 0 14px}
+    .about-3d .desc{color:var(--muted);margin:0 0 18px}
+    .p3d-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+    @media (max-width:980px){.p3d-grid{grid-template-columns:repeat(2,1fr)}}
+    @media (max-width:640px){.p3d-grid{grid-template-columns:1fr}}
+    .p3d-card{position:relative;border-radius:var(--radius);background:transparent;border:none;box-shadow:none;perspective:1200px}
+    .p3d-inner{
+      position:relative;width:100%;aspect-ratio:4/5;
+      transform-style:preserve-3d; transition:transform 600ms cubic-bezier(.2,.8,.2,1);
+      border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow);
+      border:1px solid var(--line); background:var(--surface);
+      will-change: transform;
+    }
+    .p3d-face{
+      position:absolute; inset:0; display:flex; align-items:flex-end; justify-content:stretch;
+      backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    }
+    .p3d-front{ transform: rotateY(0deg); }
+    .p3d-front img{width:100%;height:100%;object-fit:cover;display:block}
+    .p3d-front .label{
+      position:absolute;left:10px;bottom:10px;padding:6px 10px;font-weight:600;
+      background:color-mix(in lab, var(--surface) 76%, transparent);
+      border:1px solid var(--line);border-radius:10px;backdrop-filter:blur(8px)
+    }
+    .p3d-back{
+      transform: rotateY(180deg);
+      background: var(--surface) !important; color: var(--text) !important;
+      padding:18px; border:1px solid var(--line); box-shadow:none;
+      display:flex; flex-direction:column; justify-content:flex-start; align-items:flex-start;
+    }
+    .p3d-back h3{margin:2px 0 6px}
+    .p3d-back p{margin:0;color:var(--muted)}
+    .p3d-back .wm{
+      position:absolute; inset:auto auto 8px 12px; font-weight:800; letter-spacing:.08em;
+      opacity:.12; font-size:42px; pointer-events:none;
+    }
+
+    /* State flip */
+    .p3d-card.is-flipped .p3d-inner{ transform: rotateY(180deg); }
+    @media (pointer:fine){ .p3d-card:hover .p3d-inner{ transform: rotateY(180deg); } }
+
+    /* Matikan overlay glow di about (jangan nutup back) */
+    .about-3d .p3d-card.glow-ambient::after{opacity:0!important;box-shadow:none!important}
+
+    /* Responsive tweaks */
+    @media (max-width:980px){.hero{grid-template-columns:1fr}.projects{grid-template-columns:1fr 1fr}}
+    @media (max-width:640px){.projects{grid-template-columns:1fr}.contact form{grid-template-columns:1fr}}
+  </style>
+</head>
+
+<body>
+  <a class="skip" href="#home">Lewati ke konten</a>
+  <div class="grid" aria-hidden="true"></div>
+  <div class="blobs" aria-hidden="true"><div class="blob b1"></div><div class="blob b2"></div></div>
+
+  <nav class="nav">
+    <div class="nav-in">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <span class="brand-name">Y2M</span>
+      </div>
+      <div class="links" id="navLinks">
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact Us</a>
+      </div>
+      <div class="actions">
+        <button class="btn" id="themeBtn" aria-label="Ubah tema">🌓</button>
+        <button class="btn primary" id="soundBtn" aria-label="Putar/Hentikan backsound"><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="txt">♪</span></button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MARQUEE -->
+  <div class="marquee" aria-label="Pengumuman">
+    <div class="flow">
+      <div class="content" aria-hidden="true">
+        <span>★ Y2M </span><span>• Mishel</span><span>• Yasmin </span><span>★ Mitha </span>
+        <span>• Heran dengan anak jaman sekarang </span><span>• Micelatte </span>
+        <span>• Amink </span><span>• MithasMark </span>
+      </div>
+      <div class="content" aria-hidden="true">
+        <span>★ Y2M </span><span>• Mishel</span><span>• Yasmin </span><span>★ Mitha </span>
+        <span>• Heran dengan anak jaman sekarang </span><span>• Micelatte </span>
+        <span>• Amink </span><span>• MithasMark </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <section id="home" class="hero">
+    <div>
+      <h1 class="timbul" data-ani="fade-up">Portfolio</h1>
+      <p class="muted" data-ani="fade-up" data-delay="80">
+        <span class="type"><span id="typeText"></span><span class="caret"></span></span>
+      </p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px" data-ani="fade-up" data-delay="140">
+        <a href="#projects" class="btn primary">Lihat Projects</a>
+        <a href="#contact" class="btn">Hubungi Kami</a>
+      </div>
+    </div>
+    <div class="panel glow-ambient" data-ani="fade-right">
+      <img src="assets/logo.png" alt="Hero visual" />
+    </div>
+  </section>
+
+  <!-- ABOUT (3D Photos, with back text) -->
+  <section id="about" class="about-3d">
+    <h2 class="timbul">About</h2>
+    <p class="desc">Hard Worker.</p>
+
+    <div class="p3d-grid" data-stagger="120">
+      <!-- Foto 1 -->
+      <article class="p3d-card glow-ambient" data-ani="pop">
+        <div class="p3d-inner">
+          <div class="p3d-face p3d-front">
+            <img src="assets/amink.jpg" alt="Foto 1">
+            <span class="label">Yasmin Elfa Reza</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Foto 2 -->
+      <article class="p3d-card glow-ambient" data-ani="pop">
+        <div class="p3d-inner">
+          <div class="p3d-face p3d-front">
+            <img src="assets/micel.jpg" alt="Foto 2">
+            <span class="label">Ayumi Shelly Salsabila</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- Foto 3 -->
+      <article class="p3d-card glow-ambient" data-ani="pop">
+        <div class="p3d-inner">
+          <div class="p3d-face p3d-front">
+            <img src="assets/fojur%20mitha1.jpg" alt="Foto 3">
+            <span class="label">Mitha Clodya</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- PROJECTS -->
+  <section id="projects">
+    <h2 class="timbul" style="margin:0 0 12px">Projects</h2>
+    <p class="muted" style="margin-top:0">this is our projects.</p>
+    <div class="projects" data-stagger="120">
+      <article class="card glow-ambient" data-ani="pop">
+        <img src="assets/bootstrap.png" alt="Project 1" />
+        <h3>Project 1</h3>
+        <p class="muted">bootstrap</p>
+      </article>
+      <article class="card glow-ambient" data-ani="pop">
+        <img src="assets/semangkok.png" alt="Project 2" />
+        <h3>Project 2</h3>
+        <p class="muted">figma(pesan online)</p>
+      </article>
+      <article class="card glow-ambient" data-ani="pop">
+        <img src="assets/web%20school.png" alt="Project 3" />
+        <h3>Project 3</h3>
+        <p class="muted">web sekolah</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section id="contact" class="contact">
+    <h2 class="timbul">Contact Us</h2>
+    <p class="muted">Isi form di bawah, atau email kami langsung.</p>
+    <p style="margin-top:4px"><strong>Email:</strong> <a href="mailto:jemzce@gmail.com">jemzce@gmail.com</a></p>
+
+    <form onsubmit="event.preventDefault(); alert('Pesan terkirim 🎉.'); this.reset();">
+      <input type="text" name="nama" placeholder="Nama" required data-ani="fade-up" data-delay="0">
+      <input type="email" name="email" placeholder="Email" required data-ani="fade-up" data-delay="80">
+      <textarea class="full" name="pesan" placeholder="Pesan" required data-ani="fade-up" data-delay="160"></textarea>
+      <button class="btn primary full" type="submit" data-ani="fade-up" data-delay="240">Kirim</button>
+    </form>
+  </section>
+
+  <footer>© 2025 <span class="brand-name">Y2M</span>. Semua hak dilindungi.</footer>
+
+  <!-- BACKSOUND -->
+  <audio id="bgm" src="assets/backsound_converted.mp3" loop preload="auto"></audio>
+
+  <script>
+    // Tema
+    const root=document.documentElement, saved=localStorage.getItem('theme');
+    root.setAttribute('data-theme', saved || (matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'));
+    document.getElementById('themeBtn').addEventListener('click', ()=>{
+      const t=root.getAttribute('data-theme')==='dark'?'light':'dark';
+      root.setAttribute('data-theme', t); localStorage.setItem('theme', t);
+    });
+
+    // Backsound + EQ
+    const bgm=document.getElementById('bgm'), soundBtn=document.getElementById('soundBtn'); let playing=false;
+    function tryPlay(){ bgm.volume=.25; bgm.play().then(()=>{ playing=true; document.body.classList.add('is-playing'); soundBtn.querySelector('.txt').textContent='■'; }).catch(()=>{}); }
+    document.addEventListener('click', function first(){ if(!playing) tryPlay(); document.removeEventListener('click', first, {capture:true}); }, {capture:true, once:true});
+    soundBtn.addEventListener('click', ()=>{ if(playing){ bgm.pause(); playing=false; document.body.classList.remove('is-playing'); soundBtn.querySelector('.txt').textContent='♪'; } else { tryPlay(); } });
+
+    // Reveal on scroll
+    const io=new IntersectionObserver((es)=>{ es.forEach(x=>{ if(x.isIntersecting){ x.target.classList.add('in'); io.unobserve(x.target); } }); }, {threshold:.08, rootMargin:'0px 0px -10% 0px'});
+    document.querySelectorAll('[data-stagger]').forEach(p=>{
+      const step=parseInt(p.dataset.stagger,10)||120;
+      p.querySelectorAll(':scope > [data-ani]').forEach((el,i)=>{ const base=parseInt(el.dataset.delay||0); el.style.transitionDelay=(base+i*step)+'ms'; });
+    });
+    document.querySelectorAll('[data-ani]').forEach(el=> io.observe(el));
+
+    // Nav active
+    const ids=['home','about','projects','contact'], links=[...document.querySelectorAll('#navLinks a')];
+    function setActive(){ let cur=ids[0], y=scrollY+120; ids.forEach(id=>{ const el=document.getElementById(id); if(el&&el.offsetTop<=y) cur=id; }); links.forEach(a=>a.classList.toggle('active', a.getAttribute('href')==='#'+cur)); }
+    setActive(); addEventListener('scroll', setActive, {passive:true});
+
+    // Smooth scroll + flash
+    (function(){
+      const links = document.querySelectorAll('#navLinks a[href^="#"]');
+      const prefersReduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      function easeInOutCubic(t){ return t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+      function smoothScrollTo(target, dur=650){
+        const start = window.scrollY, end = start + target.getBoundingClientRect().top;
+        if (prefersReduced){ window.scrollTo({top:end, behavior:'auto'}); return; }
+        const t0 = performance.now();
+        (function step(t){
+          const p = Math.min(1, (t - t0) / dur);
+          const y = start + (end - start) * easeInOutCubic(p);
+          window.scrollTo(0, y);
+          if (p < 1) requestAnimationFrame(step);
+          else {
+            const prev = target.getAttribute('tabindex'); target.setAttribute('tabindex','-1'); target.focus({preventScroll:true});
+            if (prev === null) target.removeAttribute('tabindex');
+            target.classList.add('section-flash'); setTimeout(()=> target.classList.remove('section-flash'), 900);
+          }
+        })(t0);
+      }
+      links.forEach(a=>{
+        a.addEventListener('click', (e)=>{
+          const id = a.getAttribute('href'), target = document.querySelector(id);
+          if (!target) return; e.preventDefault(); smoothScrollTo(target, 650); history.replaceState(null, '', id);
+        });
+      });
+    })();
+
+    // Typewriter
+    const words=["Micelle","Yasmine","Mitha","Menunda pekerjaan sama dengan manabung penderitaan"];
+    const elType=document.getElementById('typeText'); let wi=0, ci=0, del=false;
+    (function typeLoop(){
+      const w=words[wi]; elType.textContent=w.slice(0,ci);
+      if(!del && ci<w.length){ ci++; setTimeout(typeLoop,70); }
+      else if(!del && ci===w.length){ del=true; setTimeout(typeLoop,1200); }
+      else if(del && ci>0){ ci--; setTimeout(typeLoop,40); }
+      else { del=false; wi=(wi+1)%words.length; setTimeout(typeLoop,70); }
+    })();
+
+    // About 3D: hover + tap + proximity (with back)
+    (function(){
+      const cards = [...document.querySelectorAll('.p3d-card')];
+      if (!cards.length) return;
+      // Mobile tap toggle
+      cards.forEach(c=>{
+        c.addEventListener('click', (e)=>{
+          if (matchMedia('(pointer: coarse)').matches){
+            e.stopPropagation(); c.classList.toggle('is-flipped');
+          }
+        });
+      });
+      document.addEventListener('click', ()=>{
+        if (!matchMedia('(pointer: coarse)').matches) return;
+        cards.forEach(c=> c.classList.remove('is-flipped'));
+      });
+      // Proximity (desktop)
+      const grid = document.querySelector('.p3d-grid');
+      if (matchMedia('(pointer:fine)').matches && grid){
+        grid.addEventListener('mousemove', (e)=>{
+          const threshold = 120;
+          cards.forEach(c=>{
+            const r = c.getBoundingClientRect();
+            const cx = r.left + r.width/2, cy = r.top + r.height/2;
+            const d = Math.hypot(e.clientX - cx, e.clientY - cy);
+            c.classList.toggle('is-flipped', d < Math.max(threshold, Math.min(r.width, r.height)*0.9));
+          });
+        });
+        grid.addEventListener('mouseleave', ()=> cards.forEach(c=> c.classList.remove('is-flipped')));
+      }
+    })();
+  </script>
+</body>
+</html>
